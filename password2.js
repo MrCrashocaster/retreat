@@ -1,5 +1,5 @@
 function checkPassword() {
-        const correctPassword = "yourSecretPassword"; // Replace with your desired password
+        const correctPassword = "CannonCares!"; // Replace with your desired password
         const enteredPassword = document.getElementById("passwordInput").value;
         const protectedContent = document.getElementById("protectedContent");
         const passwordPrompt = document.getElementById("passwordPrompt");
