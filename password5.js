@@ -1,5 +1,5 @@
 function checkPassword() {
-    const encodedPassword = "Q2Fubm9uQ2FyZXMh"; // "CannonCares!" in Base64
+    const encodedPassword = "Q2Fubm9uQ2FyZXMh";
     const correctPassword = atob(encodedPassword);
 
     const enteredPassword = document.getElementById("passwordInput").value;
