@@ -40,7 +40,7 @@ const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRoLDI1ncpL8ddPV
           const cols = parseCSVRow(row);
           const name = cols[nameIndex] || "Unknown";
           const age = cols[ageIndex] || "N/A";
-          const imageUrl = 'https://source.unsplash.com/220x140/?charity,volunteer,help&sig=${i}'; // random image per card
+          const imageUrl = `https://source.unsplash.com/220x140/?charity,volunteer,help&sig=${i}`; // random image per card
 
           // Save to variable array
           peopleData.push({ name, age, imageUrl });
