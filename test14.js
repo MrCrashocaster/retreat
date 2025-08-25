@@ -1,4 +1,4 @@
-const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRoLDI1ncpL8ddPV5JIujUm_bRitAg7gO3xM5MHwtVlh9oY-LzmfSuP15dfXE3cu20z2KEzFhj9og4e/pub?output=csv"; // Replace with your CSV link
+const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTM-jBqSXMTCgJtjiQdnHghrw67uWk9nHE6Gx31Vb4ckHH0Af7Ngq1W151_ktBKdqQhHfDXvu2s_iY0/pub?gid=2019232756&single=true&output=csv"; // Replace with your CSV link
 
 // This array will store all fetched data
 let peopleData = [];
@@ -41,8 +41,8 @@ fetch(csvUrl)
     }
 
     const headers = parseCSVRow(rows[0]);
-    const nameIndex = headers.findIndex(h => h.toLowerCase() === "name");
-    const ageIndex = headers.findIndex(h => h.toLowerCase() === "age");
+    const organizationIndex = headers.findIndex(h => h.toLowerCase() === "organization");
+    const categoryIndex = headers.findIndex(h => h.toLowerCase() === "category");
 
     // Clear container
     const container = document.getElementById("cards");
@@ -57,8 +57,8 @@ fetch(csvUrl)
   if (!row) continue; // skip empty lines
 
   const cols = parseCSVRow(row);
-  const name = cols[nameIndex] ? cols[nameIndex].trim() : "Unknown";
-  const age = cols[ageIndex] ? cols[ageIndex].trim() : "N/A";
+  const organization = cols[organizationIndex] ? cols[organizationIndex].trim() : "Unknown";
+  const category = cols[categoryIndex] ? cols[categoryIndex].trim() : "N/A";
 
   // Pick a query keyword for this card
   const query = queries[i % queries.length];
@@ -79,9 +79,9 @@ fetch(csvUrl)
   const card = document.createElement("div");
   card.classList.add("card");
   card.innerHTML = `
-    <img src="${imageUrl}" alt="${name}">
-    <h2>${name}</h2>
-    <p>Age: ${age}</p>
+    <img src="${imageUrl}" alt="${organization}">
+    <h2>${organization}</h2>
+    <p>Age: ${category}</p>
   `;
   container.appendChild(card);
 }
