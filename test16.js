@@ -15,7 +15,10 @@ async function getRandomImage(query) {
 }
 
 fetch(csvUrl)
-  .then(res => res.text())
+  .then(res => {
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    return res.text();
+  })
   .then(async csvText => {
     const rows = csvText.replace(/\r\n/g, "\n").split("\n").filter(r => r.trim() !== "");
     if (rows.length <= 1) {
@@ -23,7 +26,6 @@ fetch(csvUrl)
       return;
     }
 
-    // Simple CSV parser
     function parseCSVRow(row) {
       const result = [];
       let current = "";
@@ -41,53 +43,48 @@ fetch(csvUrl)
     }
 
     const headers = parseCSVRow(rows[0]);
-    const organizationIndex = headers.findIndex(h => h.toLowerCase() === "Organization");
-    const categoryIndex = headers.findIndex(h => h.toLowerCase() === "Category");
+    console.log("CSV headers:", headers);
 
-    // Clear container
+    const organizationIndex = headers.findIndex(h => h.toLowerCase().includes("organization"));
+    const categoryIndex = headers.findIndex(h => h.toLowerCase().includes("category"));
+
     const container = document.getElementById("cards");
     container.innerHTML = "";
 
-    // Keywords for Unsplash search
     const queries = ["charity", "community", "volunteer", "people helping", "giving back"];
+    let peopleData = [];
 
-    // Create card for each row
     for (let i = 1; i < rows.length; i++) {
-  const row = rows[i].trim();
-  if (!row) continue; // skip empty lines
+      const row = rows[i].trim();
+      if (!row) continue;
 
-  const cols = parseCSVRow(row);
-  const organization = cols[organizationIndex] ? cols[organizationIndex].trim() : "Unknown";
-  const category = cols[categoryIndex] ? cols[categoryIndex].trim() : "N/A";
+      const cols = parseCSVRow(row);
+      const organization = cols[organizationIndex]?.trim() || "Unknown";
+      const category = cols[categoryIndex]?.trim() || "N/A";
 
-  // Pick a query keyword for this card
-  const query = queries[i % queries.length];
+      const query = queries[i % queries.length];
 
-  // Wait for Unsplash image
-  let imageUrl;
-  try {
-    imageUrl = await getRandomImage(query);
-  } catch (e) {
-    console.warn(`Image fetch failed for row ${i}, using placeholder.`);
-    imageUrl = "https://via.placeholder.com/300x200?text=No+Image";
-  }
+      let imageUrl;
+      try {
+        imageUrl = await getRandomImage(query);
+      } catch (e) {
+        console.warn(`Image fetch failed for row ${i}, using placeholder.`);
+        imageUrl = "https://via.placeholder.com/300x200?text=No+Image";
+      }
 
-  // Save to variable array
-  peopleData.push({ organization, category, imageUrl });
+      peopleData.push({ organization, category, imageUrl });
 
-  // Build HTML card
-  const card = document.createElement("div");
-  card.classList.add("card");
-  card.innerHTML = `
-    <img src="${imageUrl}" alt="${organization}">
-    <h2>${organization}</h2>
-    <p>Age: ${category}</p>
-  `;
-  container.appendChild(card);
-}
+      const card = document.createElement("div");
+      card.classList.add("card");
+      card.innerHTML = `
+        <img src="${imageUrl}" alt="${organization}">
+        <h2>${organization}</h2>
+        <p>Category: ${category}</p>
+      `;
+      container.appendChild(card);
+    }
 
-
-    console.log("People data array:", peopleData); // Now you can use this array elsewhere
+    console.log("People data array:", peopleData);
   })
   .catch(err => {
     console.error("Error loading CSV:", err);
