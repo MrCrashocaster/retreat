@@ -53,29 +53,39 @@ fetch(csvUrl)
 
     // Create card for each row
     for (let i = 1; i < rows.length; i++) {
-      const cols = parseCSVRow(rows[i]);
-      const name = cols[nameIndex] || "Unknown";
-      const age = cols[ageIndex] || "N/A";
+  const row = rows[i].trim();
+  if (!row) continue; // skip empty lines
 
-      // Pick a query keyword for this card
-      const query = queries[i % queries.length];
+  const cols = parseCSVRow(row);
+  const name = cols[nameIndex] ? cols[nameIndex].trim() : "Unknown";
+  const age = cols[ageIndex] ? cols[ageIndex].trim() : "N/A";
 
-      // Wait for Unsplash image
-      const imageUrl = await getRandomImage(query);
+  // Pick a query keyword for this card
+  const query = queries[i % queries.length];
 
-      // Save to variable array
-      peopleData.push({ name, age, imageUrl });
+  // Wait for Unsplash image
+  let imageUrl;
+  try {
+    imageUrl = await getRandomImage(query);
+  } catch (e) {
+    console.warn(`Image fetch failed for row ${i}, using placeholder.`);
+    imageUrl = "https://via.placeholder.com/300x200?text=No+Image";
+  }
 
-      // Build HTML card
-      const card = document.createElement("div");
-      card.classList.add("card");
-      card.innerHTML = `
-        <img src="${imageUrl}" alt="${name}">
-        <h2>${name}</h2>
-        <p>Age: ${age}</p>
-      `;
-      container.appendChild(card);
-    }
+  // Save to variable array
+  peopleData.push({ name, age, imageUrl });
+
+  // Build HTML card
+  const card = document.createElement("div");
+  card.classList.add("card");
+  card.innerHTML = `
+    <img src="${imageUrl}" alt="${name}">
+    <h2>${name}</h2>
+    <p>Age: ${age}</p>
+  `;
+  container.appendChild(card);
+}
+
 
     console.log("People data array:", peopleData); // Now you can use this array elsewhere
   })
