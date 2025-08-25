@@ -1,4 +1,4 @@
-const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTM-jBqSXMTCgJtjiQdnHghrw67uWk9nHE6Gx31Vb4ckHH0Af7Ngq1W151_ktBKdqQhHfDXvu2s_iY0/pub?gid=2019232756&single=true&output=csv"; // Replace with your CSV link
+const csvUrl = "https://script.google.com/macros/s/AKfycbzLKGECLy2jFEqJkhfAjITK31XPAsbp8bMDTfHiGEoXLbjzGrYJvPekvgqnyRzKhlTk/exec"; // Replace with your CSV link
 
 // This array will store all fetched data
 let peopleData = [];
