@@ -34,23 +34,25 @@ const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRoLDI1ncpL8ddPV
         // Clear container
         const container = document.getElementById("cards");
         container.innerHTML = "";
+          const queries = [
+  "charity+people",
+  "volunteer+community",
+  "donation+help",
+  "nonprofit+kindness",
+  "giving+hope",
+  "helping+hands"
+];
 
         // Create card for each row
         rows.slice(1).forEach((row, i) => {
           const cols = parseCSVRow(row);
           const name = cols[nameIndex] || "Unknown";
           const age = cols[ageIndex] || "N/A";
-        const queries = [
-  "charity,people",
-  "volunteer,community",
-  "donation,help",
-  "nonprofit,kindness",
-  "giving,hope",
-  "helping,hands"
-];
+       
 
-const query = queries[i % queries.length]; // cycle through keywords
-const imageUrl = `https://source.unsplash.com/220x140/?${query}&sig=${i}`;
+// Pick a query keyword for this card
+  const query = queries[i % queries.length];
+  const imageUrl = `https://source.unsplash.com/220x140/?${query}&sig=${i}`;
 
 
 
