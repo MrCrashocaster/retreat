@@ -41,8 +41,8 @@ fetch(csvUrl)
     }
 
     const headers = parseCSVRow(rows[0]);
-    const organizationIndex = headers.findIndex(h => h.toLowerCase() === "organization");
-    const categoryIndex = headers.findIndex(h => h.toLowerCase() === "category");
+    const organizationIndex = headers.findIndex(h => h.toLowerCase() === "Organization");
+    const categoryIndex = headers.findIndex(h => h.toLowerCase() === "Category");
 
     // Clear container
     const container = document.getElementById("cards");
@@ -73,7 +73,7 @@ fetch(csvUrl)
   }
 
   // Save to variable array
-  peopleData.push({ name, age, imageUrl });
+  peopleData.push({ organization, category, imageUrl });
 
   // Build HTML card
   const card = document.createElement("div");
