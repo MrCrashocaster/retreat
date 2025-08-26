@@ -75,11 +75,11 @@ fetch(csvUrl)
       peopleData.push({ organization, category, imageUrl });
 
       const card = document.createElement("div");
-      card.classList.add("card");
+      card.classList.add("event-card");
       card.innerHTML = `
-        <img src="${imageUrl}" alt="${organization}">
+        <img class="event-image" src="${imageUrl}" alt="${organization}">
         <h2>${organization}</h2>
-        <p>Category: ${category}</p>
+        <p class="event-description">${category}</p>
       `;
       container.appendChild(card);
     }
