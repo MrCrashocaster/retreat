@@ -113,7 +113,7 @@ fetch(csvUrl)
     }
 
     renderPage(currentPage);            // render cards
-    if (pagination) pagination.style.display = 'block'; // show pagination
+    if (pagination) pagination.style.display = 'flex'; // show pagination
   })
   .catch(err => {
     console.error("Error loading CSV:", err);
