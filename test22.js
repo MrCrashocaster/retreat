@@ -3,17 +3,6 @@ const csvUrl = "https://script.google.com/macros/s/AKfycbzLKGECLy2jFEqJkhfAjITK3
 // This array will store all fetched data
 let peopleData = [];
 
-// 🔑 Your Unsplash access key
-const accessKey = "OONNkNWpgoFulLF3g0S9TGcRcgySZJKfiEnfnrOjBsU"; 
-
-// Function to fetch Unsplash random image
-async function getRandomImage(query) {
-  const url = `https://api.unsplash.com/photos/random?query=${encodeURIComponent(query)}&client_id=${accessKey}`;
-  const res = await fetch(url);
-  const data = await res.json();
-  return data.urls?.regular || "https://via.placeholder.com/300x200?text=No+Image";
-}
-
 fetch(csvUrl)
   .then(res => {
     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
@@ -81,7 +70,7 @@ fetch(csvUrl)
 
       let imageUrl;
       try {
-        imageUrl = await getRandomImage(query);
+        imageUrl = "https://pictures.dealer.com/c/cannonmotorcompanygroup/1234/f768563886014d9f957addbce086beea.PNG";
       } catch (e) {
         console.warn(`Image fetch failed for row ${i}, using placeholder.`);
         imageUrl = "https://via.placeholder.com/300x200?text=No+Image";
