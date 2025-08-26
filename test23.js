@@ -37,6 +37,7 @@ fetch(csvUrl)
     const organizationIndex = headers.findIndex(h => h.toLowerCase().includes("organization"));
     const categoryIndex = headers.findIndex(h => h.toLowerCase().includes("category"));
     const dateIndex = headers.findIndex(h => h.toLowerCase().includes("date"));
+    const descriptionIndex = headers.findIndex(h => h.toLowerCase().includes("description revised"));
 
     const container = document.getElementById("cards");
     container.innerHTML = "";
@@ -51,6 +52,7 @@ fetch(csvUrl)
       const cols = parseCSVRow(row);
       const organization = cols[organizationIndex]?.trim() || "Unknown";
       const category = cols[categoryIndex]?.trim() || "N/A";
+      const description = cols[descriptionIndex]?.trim() || "No description available";
 
       let day = "";
       let month = "";
@@ -76,7 +78,7 @@ fetch(csvUrl)
         imageUrl = "https://via.placeholder.com/300x200?text=No+Image";
       }
 
-      peopleData.push({ organization, category, day, month, imageUrl });
+      peopleData.push({ organization, category, day, month, imageUrl, description });
 
       const card = document.createElement("div");
       card.classList.add("event-card");
@@ -91,7 +93,7 @@ fetch(csvUrl)
         </div>
         <div class="card-content">
         <h3 class="event-title">${organization}</h3>
-        <p class="event-description"></p>
+        <p class="event-description">${description}</p>
         </div>
         </div>
       `;
