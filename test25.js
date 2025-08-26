@@ -2,7 +2,7 @@ const csvUrl = "https://script.google.com/macros/s/AKfycbzLKGECLy2jFEqJkhfAjITK3
 
 let peopleData = [];
 let currentPage = 1;
-const itemsPerPage = 5;
+const itemsPerPage = 6;
 
 // CSV parsing function
 function parseCSVRow(row) {
