@@ -47,6 +47,7 @@ fetch(csvUrl)
 
     const organizationIndex = headers.findIndex(h => h.toLowerCase().includes("organization"));
     const categoryIndex = headers.findIndex(h => h.toLowerCase().includes("category"));
+    const dateIndex = headers.findIndex(h => h.toLowerCase().includes("date"));
 
     const container = document.getElementById("cards");
     container.innerHTML = "";
@@ -62,6 +63,20 @@ fetch(csvUrl)
       const organization = cols[organizationIndex]?.trim() || "Unknown";
       const category = cols[categoryIndex]?.trim() || "N/A";
 
+      let day = "";
+      let month = "";
+      if (dateIndex !== -1 && cols[dateIndex]) {
+        try {
+          const dateObj = new Date(cols[dateIndex].trim());
+          if (!isNaN(dateObj)) {
+            day = dateObj.getDate(); // 1–31
+            month = dateObj.toLocaleString("default", { month: "short" }); // e.g. Jan, Feb
+          }
+        } catch (err) {
+          console.warn("Invalid date:", cols[dateIndex]);
+        }
+      }
+      
       const query = queries[i % queries.length];
 
       let imageUrl;
@@ -72,7 +87,7 @@ fetch(csvUrl)
         imageUrl = "https://via.placeholder.com/300x200?text=No+Image";
       }
 
-      peopleData.push({ organization, category, imageUrl });
+      peopleData.push({ organization, category, day, month, imageUrl });
 
       const card = document.createElement("div");
       card.classList.add("event-card");
@@ -81,8 +96,8 @@ fetch(csvUrl)
         <div class="image-container">
         <img src="${imageUrl}" alt="${organization}" class="event-image dynamic-resize">
         <div class="date-label">
-        <span class="date-day"></span>
-        <span class="date-month"></span>
+        <span class="date-day">${day || ""}</span>
+        <span class="date-month">${month || ""}</span>
         </div>
         </div>
         <div class="card-content">
