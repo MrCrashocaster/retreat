@@ -73,7 +73,9 @@ document.getElementById("nextPage").addEventListener("click", () => {
   }
 });
 
-// Fetch CSV
+const pagination = document.querySelector('.pagination');
+if (pagination) pagination.style.display = 'none'; // hide at start
+
 fetch(csvUrl)
   .then(res => {
     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
@@ -91,8 +93,6 @@ fetch(csvUrl)
     const dateIndex = headers.findIndex(h => h.toLowerCase().includes("date"));
     const descriptionIndex = headers.findIndex(h => h.toLowerCase().includes("description revised"));
 
-    const queries = ["charity", "community", "volunteer", "people helping", "giving back"];
-
     for (let i = 1; i < rows.length; i++) {
       const cols = parseCSVRow(rows[i]);
       const organization = cols[organizationIndex]?.trim() || "Unknown";
@@ -107,15 +107,16 @@ fetch(csvUrl)
         }
       }
 
-      // Use a default image (replace or map to real images as needed)
       const imageUrl = "https://pictures.dealer.com/c/cannonmotorcompanygroup/1234/f768563886014d9f957addbce086beea.PNG";
 
       peopleData.push({ organization, day, month, description, imageUrl });
     }
 
-    renderPage(currentPage);
+    renderPage(currentPage);            // render cards
+    if (pagination) pagination.style.display = 'block'; // show pagination
   })
   .catch(err => {
     console.error("Error loading CSV:", err);
     document.getElementById("cards").innerText = "Error loading data.";
   });
+
