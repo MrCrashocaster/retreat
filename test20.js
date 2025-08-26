@@ -77,9 +77,19 @@ fetch(csvUrl)
       const card = document.createElement("div");
       card.classList.add("event-card");
       card.innerHTML = `
-        <img class="event-image" src="${imageUrl}" alt="${organization}">
-        <h2>${organization}</h2>
-        <p class="event-description">${category}</p>
+        <div class="event-card">
+        <div class="image-container">
+        <img src="${imageUrl}" alt="${organization}" class="event-image dynamic-resize">
+        <div class="date-label">
+        <span class="date-day"></span>
+        <span class="date-month"></span>
+        </div>
+        </div>
+        <div class="card-content">
+        <h3 class="event-title">${organization}</h3>
+        <p class="event-description"></p>
+        </div>
+        </div>
       `;
       container.appendChild(card);
     }
