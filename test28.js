@@ -1,10 +1,11 @@
 const csvUrl = "https://script.google.com/macros/s/AKfycbzLKGECLy2jFEqJkhfAjITK31XPAsbp8bMDTfHiGEoXLbjzGrYJvPekvgqnyRzKhlTk/exec"; 
 
 let peopleData = [];
+let filteredData = [];
 let currentPage = 1;
 const itemsPerPage = 6;
 
-// CSV parsing function
+// CSV parsing
 function parseCSVRow(row) {
   const result = [];
   let current = "";
@@ -21,17 +22,17 @@ function parseCSVRow(row) {
   return result;
 }
 
-// Render a page of cards
+// Render page of events
 function renderPage(page) {
   const container = document.getElementById("cards");
   container.innerHTML = "";
 
   const start = (page - 1) * itemsPerPage;
   const end = start + itemsPerPage;
-  const pageItems = peopleData.slice(start, end);
+  const pageItems = filteredData.slice(start, end);
 
   if (pageItems.length === 0) {
-    container.innerText = "No events to display.";
+    container.innerText = "No events match your filter.";
     return;
   }
 
@@ -54,12 +55,57 @@ function renderPage(page) {
     container.appendChild(card);
   });
 
-  document.getElementById("pageInfo").innerText = `Page ${currentPage} of ${Math.ceil(peopleData.length / itemsPerPage)}`;
+  document.getElementById("pageInfo").innerText = `Page ${currentPage} of ${Math.ceil(filteredData.length / itemsPerPage)}`;
   document.getElementById("prevPage").disabled = page === 1;
-  document.getElementById("nextPage").disabled = page >= Math.ceil(peopleData.length / itemsPerPage);
+  document.getElementById("nextPage").disabled = page >= Math.ceil(filteredData.length / itemsPerPage);
 }
 
-// Navigation buttons
+// Filtering logic
+function applyFilters() {
+  const dateFilter = document.getElementById("dateFilter").value;
+  const categoryFilter = document.getElementById("categoryFilter").value.toLowerCase();
+
+  filteredData = peopleData.filter(event => {
+    let matchesDate = true;
+    let matchesCategory = true;
+
+    if (dateFilter && event.month !== dateFilter) matchesDate = false;
+    if (categoryFilter && !event.category.toLowerCase().includes(categoryFilter)) matchesCategory = false;
+
+    return matchesDate && matchesCategory;
+  });
+
+  currentPage = 1;
+  renderPage(currentPage);
+}
+
+// Populate filter options dynamically
+function populateFilters() {
+  const dateSelect = document.getElementById("dateFilter");
+  const categorySelect = document.getElementById("categoryFilter");
+
+  const months = [...new Set(peopleData.map(e => e.month).filter(Boolean))];
+  const categories = [...new Set(peopleData.map(e => e.category).filter(Boolean))];
+
+  months.forEach(month => {
+    const opt = document.createElement("option");
+    opt.value = month;
+    opt.textContent = month;
+    dateSelect.appendChild(opt);
+  });
+
+  categories.forEach(cat => {
+    const opt = document.createElement("option");
+    opt.value = cat;
+    opt.textContent = cat;
+    categorySelect.appendChild(opt);
+  });
+
+  dateSelect.addEventListener("change", applyFilters);
+  categorySelect.addEventListener("change", applyFilters);
+}
+
+// Pagination buttons
 document.getElementById("prevPage").addEventListener("click", () => {
   if (currentPage > 1) {
     currentPage--;
@@ -67,15 +113,16 @@ document.getElementById("prevPage").addEventListener("click", () => {
   }
 });
 document.getElementById("nextPage").addEventListener("click", () => {
-  if (currentPage < Math.ceil(peopleData.length / itemsPerPage)) {
+  if (currentPage < Math.ceil(filteredData.length / itemsPerPage)) {
     currentPage++;
     renderPage(currentPage);
   }
 });
 
 const pagination = document.querySelector('.pagination');
-if (pagination) pagination.style.display = 'none'; // hide at start
+if (pagination) pagination.style.display = 'none';
 
+// Fetch CSV
 fetch(csvUrl)
   .then(res => {
     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
@@ -92,11 +139,13 @@ fetch(csvUrl)
     const organizationIndex = headers.findIndex(h => h.toLowerCase().includes("organization"));
     const dateIndex = headers.findIndex(h => h.toLowerCase().includes("date"));
     const descriptionIndex = headers.findIndex(h => h.toLowerCase().includes("description revised"));
+    const categoryIndex = headers.findIndex(h => h.toLowerCase().includes("category")); // <-- new category column
 
     for (let i = 1; i < rows.length; i++) {
       const cols = parseCSVRow(rows[i]);
       const organization = cols[organizationIndex]?.trim() || "Unknown";
       const description = cols[descriptionIndex]?.trim() || "No description available";
+      const category = categoryIndex !== -1 ? (cols[categoryIndex]?.trim() || "Uncategorized") : "Uncategorized";
 
       let day = "", month = "";
       if (dateIndex !== -1 && cols[dateIndex]) {
@@ -109,14 +158,15 @@ fetch(csvUrl)
 
       const imageUrl = "https://pictures.dealer.com/c/cannonmotorcompanygroup/1234/f768563886014d9f957addbce086beea.PNG";
 
-      peopleData.push({ organization, day, month, description, imageUrl });
+      peopleData.push({ organization, day, month, description, category, imageUrl });
     }
 
-    renderPage(currentPage);            // render cards
-    if (pagination) pagination.style.display = 'flex'; // show pagination
+    filteredData = [...peopleData];
+    populateFilters();
+    renderPage(currentPage);
+    if (pagination) pagination.style.display = 'flex';
   })
   .catch(err => {
     console.error("Error loading CSV:", err);
     document.getElementById("cards").innerText = "Error loading data.";
   });
-
