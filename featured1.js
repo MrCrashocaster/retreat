@@ -14,12 +14,23 @@ function parseCSVRow(row) {
     const char = row[i];
     if (char === '"') inQuotes = !inQuotes;
     else if (char === "," && !inQuotes) {
-      result.push(current);
+      result.push(current.trim());
       current = "";
     } else current += char;
   }
-  result.push(current);
+  result.push(current.trim());
   return result;
+}
+
+// Convert array row into event object
+function rowToEvent(row) {
+  return {
+    imageUrl: row[0] || "",
+    organization: row[1] || "",
+    description: row[2] || "",
+    day: row[3] || "",
+    month: row[4] || ""
+  };
 }
 
 // Render page of events
@@ -59,3 +70,18 @@ function renderPage(page) {
   document.getElementById("prevPage").disabled = page === 1;
   document.getElementById("nextPage").disabled = page >= Math.ceil(filteredData.length / itemsPerPage);
 }
+
+// Fetch and load data
+fetch(csvUrl)
+  .then(res => res.text())
+  .then(text => {
+    const rows = text.trim().split("\n").map(parseCSVRow);
+    // skip header row if your CSV has one
+    peopleData = rows.slice(1).map(rowToEvent);
+    filteredData = peopleData;
+    renderPage(currentPage);
+  })
+  .catch(err => {
+    document.getElementById("cards").innerText = "Error loading events.";
+    console.error("CSV fetch error:", err);
+  });
