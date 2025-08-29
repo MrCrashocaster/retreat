@@ -14,23 +14,12 @@ function parseCSVRow(row) {
     const char = row[i];
     if (char === '"') inQuotes = !inQuotes;
     else if (char === "," && !inQuotes) {
-      result.push(current.trim());
+      result.push(current);
       current = "";
     } else current += char;
   }
-  result.push(current.trim());
+  result.push(current);
   return result;
-}
-
-// Convert array row into event object
-function rowToEvent(row) {
-  return {
-    imageUrl: row[0] || "",
-    organization: row[1] || "",
-    description: row[2] || "",
-    day: row[3] || "",
-    month: row[4] || ""
-  };
 }
 
 // Render page of events
@@ -71,17 +60,113 @@ function renderPage(page) {
   document.getElementById("nextPage").disabled = page >= Math.ceil(filteredData.length / itemsPerPage);
 }
 
-// Fetch and load data
-fetch(csvUrl)
-  .then(res => res.text())
-  .then(text => {
-    const rows = text.trim().split("\n").map(parseCSVRow);
-    // skip header row if your CSV has one
-    peopleData = rows.slice(1).map(rowToEvent);
-    filteredData = peopleData;
+// Filtering logic
+function applyFilters() {
+  const dateFilter = document.getElementById("dateFilter").value;
+  const categoryFilter = document.getElementById("categoryFilter").value.toLowerCase();
+
+  filteredData = peopleData.filter(event => {
+    let matchesDate = true;
+    let matchesCategory = true;
+
+    if (dateFilter && event.month !== dateFilter) matchesDate = false;
+    if (categoryFilter && !event.category.toLowerCase().includes(categoryFilter)) matchesCategory = false;
+
+    return matchesDate && matchesCategory;
+  });
+
+  currentPage = 1;
+  renderPage(currentPage);
+}
+
+// Populate filter options dynamically
+function populateFilters() {
+  const dateSelect = document.getElementById("dateFilter");
+  const categorySelect = document.getElementById("categoryFilter");
+
+  const months = [...new Set(peopleData.map(e => e.month).filter(Boolean))];
+  const categories = [...new Set(peopleData.map(e => e.category).filter(Boolean))];
+
+  months.forEach(month => {
+    const opt = document.createElement("option");
+    opt.value = month;
+    opt.textContent = month;
+    dateSelect.appendChild(opt);
+  });
+
+  categories.forEach(cat => {
+    const opt = document.createElement("option");
+    opt.value = cat;
+    opt.textContent = cat;
+    categorySelect.appendChild(opt);
+  });
+
+  dateSelect.addEventListener("change", applyFilters);
+  categorySelect.addEventListener("change", applyFilters);
+}
+
+// Pagination buttons
+document.getElementById("prevPage").addEventListener("click", () => {
+  if (currentPage > 1) {
+    currentPage--;
     renderPage(currentPage);
+  }
+});
+document.getElementById("nextPage").addEventListener("click", () => {
+  if (currentPage < Math.ceil(filteredData.length / itemsPerPage)) {
+    currentPage++;
+    renderPage(currentPage);
+  }
+});
+
+const pagination = document.querySelector('.pagination');
+if (pagination) pagination.style.display = 'none';
+
+// Fetch CSV
+fetch(csvUrl)
+  .then(res => {
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    return res.text();
+  })
+  .then(csvText => {
+    const rows = csvText.replace(/\r\n/g, "\n").split("\n").filter(r => r.trim() !== "");
+    if (rows.length <= 1) {
+      document.getElementById("cards").innerText = "No data found.";
+      return;
+    }
+
+    const headers = parseCSVRow(rows[0]);
+    const organizationIndex = headers.findIndex(h => h.toLowerCase().includes("organization"));
+    const dateIndex = headers.findIndex(h => h.toLowerCase().includes("date"));
+    const descriptionIndex = headers.findIndex(h => h.toLowerCase().includes("description revised"));
+    const categoryIndex = headers.findIndex(h => h.toLowerCase().includes("category")); // <-- new category column
+
+    for (let i = 1; i < rows.length; i++) {
+      const cols = parseCSVRow(rows[i]);
+      const organization = cols[organizationIndex]?.trim() || "Unknown";
+      const description = cols[descriptionIndex]?.trim() || "No description available";
+      const category = categoryIndex !== -1 ? (cols[categoryIndex]?.trim() || "Uncategorized") : "Uncategorized";
+
+      let day = "", month = "";
+      if (dateIndex !== -1 && cols[dateIndex]) {
+        const dateObj = new Date(cols[dateIndex].trim());
+        if (!isNaN(dateObj)) {
+          day = dateObj.getDate();
+          month = dateObj.toLocaleString("default", { month: "short" });
+        }
+      }
+
+      const imageUrl = "https://pictures.dealer.com/c/cannonmotorcompanygroup/1234/f768563886014d9f957addbce086beea.PNG";
+
+      peopleData.push({ organization, day, month, description, category, imageUrl });
+    }
+
+    filteredData = [...peopleData];
+    populateFilters();
+    renderPage(currentPage);
+    if (pagination) pagination.style.display = 'flex';
   })
   .catch(err => {
-    document.getElementById("cards").innerText = "Error loading events.";
-    console.error("CSV fetch error:", err);
+    console.error("Error loading CSV:", err);
+    document.getElementById("cards").innerText = "Error loading data.";
   });
