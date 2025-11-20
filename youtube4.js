@@ -14,11 +14,13 @@
     function openVideoModal() {
       const overlay = document.getElementById("videoModalOverlay");
       overlay.classList.remove("hidden");
+      document.body.style.overflow = "hidden";
     }
 
     function closeVideoModal() {
       const overlay = document.getElementById("videoModalOverlay");
       overlay.classList.add("hidden");
+      document.body.style.overflow = "scroll";
 
       if (player && typeof player.stopVideo === "function") {
         player.stopVideo();
