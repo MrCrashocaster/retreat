@@ -1,7 +1,7 @@
 // 🔧 CONFIG: Put your YouTube video ID here.
     // Example YouTube URL: https://www.youtube.com/watch?v=dQw4w9WgXcQ
     // The video ID is the part after "v=" → "dQw4w9WgXcQ"
-    const YT_VIDEO_ID = "lh__r69Jqec";
+    const YT_VIDEO_ID = "EzMdDue3AjQ";
 
     let player;
 
