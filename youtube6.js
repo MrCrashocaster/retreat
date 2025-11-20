@@ -57,7 +57,10 @@
     function onPlayerReady(event) {
       // Many browsers only allow autoplay if the video is muted
       // You can remove mute() if you prefer, but autoplay may not work everywhere.
-      event.target.mute();
+      event.target.unMute();
+      event.target.setVolume(100); // full volume, optional
+
+      // Try to autoplay
       event.target.playVideo();
     }
 
