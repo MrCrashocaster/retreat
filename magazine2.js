@@ -1,7 +1,5 @@
-import * as pdfjsLib from "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.min.mjs";
-
 pdfjsLib.GlobalWorkerOptions.workerSrc =
-  "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.worker.min.mjs";
+  "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
 class CannonMagazineViewer {
   constructor(root) {
@@ -43,12 +41,7 @@ class CannonMagazineViewer {
     this.bindEvents();
 
     try {
-      const loadingTask = pdfjsLib.getDocument({
-        url: this.pdfUrl,
-        cMapUrl: "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/cmaps/",
-        cMapPacked: true
-      });
-
+      const loadingTask = pdfjsLib.getDocument(this.pdfUrl);
       this.pdfDoc = await loadingTask.promise;
       this.totalPagesEl.textContent = this.pdfDoc.numPages;
       await this.renderPage(this.pageNum, false);
@@ -85,7 +78,7 @@ class CannonMagazineViewer {
     await this.renderPage(this.pageNum, false);
   }
 
-  async renderPage(pageNumber, animateDirection = false) {
+  async renderPage(pageNumber, animateDirection) {
     if (!this.pdfDoc) return;
 
     if (this.isRendering) {
@@ -101,27 +94,19 @@ class CannonMagazineViewer {
       const unscaledViewport = page.getViewport({ scale: 1 });
 
       const stage = this.root.querySelector(".cm-mag-stage");
-      const stageStyles = window.getComputedStyle(stage);
-      const stageWidth =
-        stage.clientWidth -
-        parseFloat(stageStyles.paddingLeft || 0) -
-        parseFloat(stageStyles.paddingRight || 0);
+      const stageWidth = Math.min(stage.clientWidth - 24, 980);
 
-      const maxViewerWidth = Math.min(stageWidth - 24, 980);
-      const fittedScale = maxViewerWidth / unscaledViewport.width;
-      this.baseScale = fittedScale;
-
+      this.baseScale = stageWidth / unscaledViewport.width;
       const finalScale = this.baseScale * this.scale;
       const viewport = page.getViewport({ scale: finalScale });
 
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       this.canvas.width = Math.floor(viewport.width * dpr);
       this.canvas.height = Math.floor(viewport.height * dpr);
-      this.canvas.style.width = `${viewport.width}px`;
-      this.canvas.style.height = `${viewport.height}px`;
+      this.canvas.style.width = viewport.width + "px";
+      this.canvas.style.height = viewport.height + "px";
 
       this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      this.ctx.imageSmoothingEnabled = true;
       this.ctx.clearRect(0, 0, viewport.width, viewport.height);
 
       if (animateDirection) {
@@ -136,7 +121,7 @@ class CannonMagazineViewer {
 
       this.renderTask = page.render({
         canvasContext: this.ctx,
-        viewport
+        viewport: viewport
       });
 
       await this.renderTask.promise;
@@ -145,7 +130,7 @@ class CannonMagazineViewer {
       this.currentPageEl.textContent = this.pageNum;
       this.hideLoader();
     } catch (error) {
-      if (error?.name !== "RenderingCancelledException") {
+      if (error && error.name !== "RenderingCancelledException") {
         console.error(error);
         this.showError("Could not render page.");
       }
@@ -180,14 +165,12 @@ class CannonMagazineViewer {
   }
 
   nextPage() {
-    if (!this.pdfDoc) return;
-    if (this.pageNum >= this.pdfDoc.numPages) return;
+    if (!this.pdfDoc || this.pageNum >= this.pdfDoc.numPages) return;
     this.renderPage(this.pageNum + 1, "next");
   }
 
   prevPage() {
-    if (!this.pdfDoc) return;
-    if (this.pageNum <= 1) return;
+    if (!this.pdfDoc || this.pageNum <= 1) return;
     this.renderPage(this.pageNum - 1, "prev");
   }
 
@@ -211,11 +194,10 @@ class CannonMagazineViewer {
 
   showError(message) {
     this.loader.classList.remove("is-hidden");
-    this.loader.innerHTML = `<div class="cm-mag-loader__text">${message}</div>`;
+    this.loader.innerHTML = '<div class="cm-mag-loader__text">' + message + "</div>";
   }
 }
 
-document.querySelectorAll(".cm-mag-viewer").forEach((viewer) => {
-  const instance = new CannonMagazineViewer(viewer);
-  instance.init();
+document.querySelectorAll(".cm-mag-viewer").forEach(function (viewer) {
+  new CannonMagazineViewer(viewer).init();
 });
